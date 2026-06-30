@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリのコードを取得
+        uses: actions/checkout@v4
+
+      - name: Node.jsのセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "bun"
+
+      - name: 依存関係のインストール
+        run: bun ci
+
+      - name: テストの実行
+        run: bun test
+
+      - name: ビルドの実行
+        run: bun run build

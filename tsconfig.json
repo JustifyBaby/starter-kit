@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@schema/*": ["./src/types/schema/*"]
     }
   },
   "include": [
