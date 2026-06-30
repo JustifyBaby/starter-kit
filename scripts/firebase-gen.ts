@@ -1,37 +1,46 @@
 import { Stdin } from "tslib-stdin";
-
-const CONFIG_NOTICE = "const firebaseConfig";
+import fs from "node:fs";
+import { env } from "../env";
+import path from "node:path";
 
 const firebases = Stdin.streamReads(
   "Firebase text >> \n",
   (line) => line === "EOF" || line === "eof",
 );
 
-// const startConfig_i = firebases.findIndex((value) =>
-//   value.includes(CONFIG_NOTICE),
-// );
+const fmtSymbol = (sym: string): [string, string] => {
+  const [key, value] = sym
+    .split(":")
+    .map((elm) => elm.replaceAll(/[\s\\",]/g, ""));
 
-// if (startConfig_i === -1) {
-//   throw new Error(`${firebases.join("\n")}
-//   have to include "${CONFIG_NOTICE}"`);
-// }
+  return [key, value];
+};
 
-// const endConfig_i =
-//   startConfig_i +
-//   firebases
-//     .slice(startConfig_i, firebases.length)
-//     .findIndex((value) => value.includes("}"));
+const configs = firebases
+  .filter((value) => value.split(":").length === 2 && !value.includes("//"))
+  .map((value) => fmtSymbol(value));
 
-// if (endConfig_i === -1) {
-//   throw new Error(`May be syntax error! "}" is necessary!`);
-// }
-// const configs = firebases.slice(startConfig_i, endConfig_i);
+const genEnvName = (key: string): `NEXT_PUBLIC_${string}` => {
+  const keyToUpper = Array.from(key)
+    .map((char) => {
+      if (/[A-Z]/.test(char)) {
+        return `_${char}`;
+      }
+      return char.toUpperCase();
+    })
+    .join("");
 
-const configs = firebases.filter(
-  (value) => value.split(":").length === 2 && !value.includes("//"),
-);
+  return `NEXT_PUBLIC_${keyToUpper}`;
+};
 
-console.log(configs);
-// configs.forEach((config) => {
-//   config.split(":");
+const fmtConfigs = configs.map(([name, value]) => {
+  const envName = genEnvName(name);
+  return [envName, value];
+});
+
+// fmtConfigs.forEach(([name, value]) => {
+//   fs.writeFile(path.join(env.ABS_BASEPATH, "src", "lib", "firebase.ts"),name,);
+//   fs.writeFile(path.join(env.ABS_BASEPATH, ".env"));
 // });
+
+console.log(fmtConfigs);
