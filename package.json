@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "gtype": "bun scripts/z-to-type.ts",
-    "gcomp": "bun scripts/gen-component.ts"
+    "genc": "bun scripts/gen-component.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -31,7 +31,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/bun": "^1.3.14",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
