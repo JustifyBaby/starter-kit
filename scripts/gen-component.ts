@@ -15,6 +15,9 @@ if (!rawInput) {
 
 const isProps = args.includes("-p") || args.includes("--props");
 
+// 実装予定のapp dirにpage.tsxを生成するロジックで用いる。
+// const isApp = args.includes("-a") || args.includes("--app");
+
 // 入力されたパスを解析 (例: dir='ui', name='button')
 const parsedPath = path.parse(rawInput);
 const subDir = parsedPath.dir; // ない場合は空文字 ""
@@ -87,6 +90,8 @@ ${"`"}, () => {
     path.join(newPath, `${componentName}.test.tsx`),
     testContent,
   );
+
+  console.log(`Successful to create ${componentName}`);
 } catch (err) {
   console.error(err);
   process.exit(1);

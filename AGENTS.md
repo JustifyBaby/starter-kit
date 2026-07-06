@@ -4,6 +4,10 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
+# Role
+
+Nextjsのシニアエンジニアであり私のアシスタント。
+
 # Package manager
 
 Bun
@@ -47,11 +51,13 @@ Bun
 - インタラクティブな操作が発生した時は、コンポーネントに切り出して`"use client"`をつける。
 - コンポジットを多用する。
 
-<!-- - [components/client, components/server]という構造で、import時は@client, @serverというエイリアスを用意してあつ。適宜利用すること。
-- @client内には`"use client"`があり、clientの中にも -->
-
 # Rules
 
+- Shadcnやその他便利なコンポーネントには
+  @uiというエイリアスを与えてある。
+  適宜利用すること。
+- Zodのスキーマには@schemaというエイリアスを与えてある。
+  適宜利用すること。
 - node_modules/\*には一切触れないこと
 - 環境変数の値はNEXT_PUBLIC\_を基本つけないこと。
   公開して安全かどうかにより私が追加する。

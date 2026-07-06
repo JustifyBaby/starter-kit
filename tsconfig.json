@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@schema/*": ["./src/types/schema/*"]
+      "@schema/*": ["./src/types/schema/*"],
+      "@ui/*": ["./src/components/ui/*"]
     }
   },
   "include": [
