@@ -9,6 +9,9 @@
     フォームのラベルとそのTextが対応。
       FormActionBySchemaではServerActionの関数
       FormOnSubmitBySchemaではuseFormのhandleSubmitの中に入れる関数を代入します。
+  
+  @notice :
+    "use client"必須
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +20,7 @@ import {
   FieldErrors,
   type FieldValues,
   type Path,
+  SubmitHandler,
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
@@ -26,6 +30,7 @@ import { Input } from "./input";
 import { Label } from "./label";
 import { Button } from "./button";
 import { AlertZod } from "./alert";
+import { Action } from "@/types/global/FormAction";
 
 const formVariants = cva("grid", {
   variants: {
@@ -101,13 +106,13 @@ interface FormBySchemaProps<ZS> extends VariantProps<typeof formVariants> {
 }
 
 interface FormActionBySchemaProps<ZS> extends FormBySchemaProps<ZS> {
-  action: (formData: FormData) => Promise<void>;
+  action: Action;
 }
 
 interface FormOnsubmitBySchemaProps<
   ZS extends FormSchema,
 > extends FormBySchemaProps<ZS> {
-  onSubmit: (data: z.output<ZS>) => void;
+  onSubmit: SubmitHandler<z.output<ZS>>;
 }
 
 interface FormFieldsProps<
@@ -186,16 +191,17 @@ export function OnSubmitFormBySchema<ZS extends FormSchema>({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<
-    z.input<ZS>,
-    unknown,
-    z.output<ZS>
-  >({
+    reset,
+  } = useForm<z.input<ZS>, unknown, z.output<ZS>>({
     resolver: zodResolver(Schema),
   });
+
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit((data) => {
+        onSubmit(data);
+        reset();
+      })}
       className={cn(formVariants({ variant, className }))}
     >
       <FormFields

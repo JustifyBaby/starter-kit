@@ -67,16 +67,15 @@ function collectFieldErrorMessages(error: unknown): string[] {
   }
 
   if (typeof error === "object") {
-    const maybeMessage =
-      "message" in error && typeof error.message === "string"
-        ? error.message
-        : null;
+    if ("message" in error && typeof error.message === "string") {
+      return [error.message];
+    }
 
     const nestedMessages = Object.values(error).flatMap((value) =>
       collectFieldErrorMessages(value),
     );
 
-    return maybeMessage ? [maybeMessage, ...nestedMessages] : nestedMessages;
+    return nestedMessages;
   }
 
   return [];

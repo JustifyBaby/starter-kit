@@ -74,11 +74,15 @@ export default function ${componentName}(${isProps ? `{}: ${componentName}Props`
 
   const testContent = `
 import { describe, test, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import ${componentName} from "./${componentName}";
 
 describe(${"`"}
   Component: ${componentName}
 ${"`"}, () => {
-  test(${"`"}${"`"}, () => {});
+  test(${"`"}${"`"}, () => {
+    render(<${componentName} />);
+  });
 });
 `;
 
