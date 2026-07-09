@@ -7,8 +7,8 @@
       Zodのスキーマを引数にとり、useFormとスキーマからバリデーション。
       labelTextというpropsをオブジェクトで渡すと、
     フォームのラベルとそのTextが対応。
-      FormActionBySchemaではServerActionの関数
-      FormOnSubmitBySchemaではuseFormのhandleSubmitの中に入れる関数を代入します。
+      FormActionではServerActionの関数
+      FormOnSubmitではuseFormのhandleSubmitの中に入れる関数を代入します。
   
   @notice :
     "use client"必須
@@ -31,6 +31,7 @@ import { Label } from "./label";
 import { Button } from "./button";
 import { AlertZod } from "./alert";
 import { Action } from "@/types/global/FormAction";
+import { type ReactNode, useActionState, useEffect, useRef } from "react";
 
 const formVariants = cva("grid", {
   variants: {
@@ -92,6 +93,23 @@ const formInputVariants = cva("", {
   },
 });
 
+const actionStateSubmitButtonVariants = cva(
+  "mt-1 h-10 w-full rounded-lg text-sm font-semibold shadow-sm shadow-foreground/10 transition-transform hover:-translate-y-0.5 disabled:translate-y-0",
+  {
+    variants: {
+      variant: {
+        default: "",
+        compact: "h-8 text-xs",
+        panel: "shadow-md shadow-foreground/10",
+        elevated: "shadow-lg shadow-foreground/15",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
 type FormSchema = z.ZodObject;
 type FormShape<ZS> = ZS extends z.ZodObject<infer Shape> ? Shape : never;
 type FormLabelText<ZS> = {
@@ -105,11 +123,11 @@ interface FormBySchemaProps<ZS> extends VariantProps<typeof formVariants> {
   className?: string;
 }
 
-interface FormActionBySchemaProps<ZS> extends FormBySchemaProps<ZS> {
+interface FormActionProps<ZS> extends FormBySchemaProps<ZS> {
   action: Action;
 }
 
-interface FormOnsubmitBySchemaProps<
+interface FormOnsubmitProps<
   ZS extends FormSchema,
 > extends FormBySchemaProps<ZS> {
   onSubmit: SubmitHandler<z.output<ZS>>;
@@ -122,6 +140,44 @@ interface FormFieldsProps<
   labelText: FormLabelText<TOutput>;
   register: UseFormRegister<TInput>;
   errors?: FieldErrors<TInput>;
+}
+
+type ActionStateHandler<TState> = (
+  previousState: TState,
+  formData: FormData,
+) => TState | Promise<TState>;
+
+type ResetOnSuccess<TState> = boolean | ((state: TState) => boolean);
+
+interface FormActionStateProps<ZS extends FormSchema, TState extends object>
+  extends FormBySchemaProps<ZS> {
+  action: ActionStateHandler<TState>;
+  initialState: TState;
+  pendingText?: string;
+  renderState?: (state: TState) => ReactNode;
+  resetOnSuccess?: ResetOnSuccess<TState>;
+}
+
+function isSuccessfulActionState<TState>(state: TState) {
+  if (typeof state !== "object" || state === null) {
+    return false;
+  }
+
+  return (
+    ("ok" in state && state.ok === true) ||
+    ("success" in state && state.success === true)
+  );
+}
+
+function shouldResetActionState<TState>(
+  state: TState,
+  resetOnSuccess: ResetOnSuccess<TState> | undefined,
+) {
+  if (typeof resetOnSuccess === "function") {
+    return resetOnSuccess(state);
+  }
+
+  return resetOnSuccess === true && isSuccessfulActionState(state);
 }
 
 function FormFields<TInput extends FieldValues, TOutput>({
@@ -147,14 +203,14 @@ function FormFields<TInput extends FieldValues, TOutput>({
   );
 }
 
-export function ActionFormBySchema<ZS extends FormSchema>({
+export function ActionForm<ZS extends FormSchema>({
   Schema,
   labelText,
   action,
   variant,
   className,
   submitText,
-}: FormActionBySchemaProps<ZS>) {
+}: FormActionProps<ZS>) {
   const {
     register,
     formState: { errors, isSubmitting },
@@ -179,14 +235,14 @@ export function ActionFormBySchema<ZS extends FormSchema>({
     </form>
   );
 }
-export function OnSubmitFormBySchema<ZS extends FormSchema>({
+export function OnSubmitForm<ZS extends FormSchema>({
   Schema,
   labelText,
   onSubmit,
   variant,
   className,
   submitText,
-}: FormOnsubmitBySchemaProps<ZS>) {
+}: FormOnsubmitProps<ZS>) {
   const {
     register,
     handleSubmit,
@@ -221,4 +277,71 @@ export function OnSubmitFormBySchema<ZS extends FormSchema>({
   );
 }
 
-export { formVariants };
+export function ActionStateForm<ZS extends FormSchema, TState extends object>({
+  action,
+  initialState,
+  Schema,
+  labelText,
+  submitText,
+  pendingText,
+  className,
+  variant,
+  renderState,
+  resetOnSuccess,
+}: FormActionStateProps<ZS, TState>) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const initialStateRef = useRef(initialState);
+  const [state, formAction, isPending] = useActionState<TState, FormData>(
+    action,
+    initialState as Awaited<TState>,
+  );
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<z.input<ZS>, unknown, z.output<ZS>>({
+    resolver: zodResolver(Schema),
+    mode: "onBlur",
+  });
+
+  useEffect(() => {
+    if (Object.is(state, initialStateRef.current)) {
+      return;
+    }
+
+    if (shouldResetActionState(state, resetOnSuccess)) {
+      reset();
+      formRef.current?.reset();
+    }
+  }, [reset, resetOnSuccess, state]);
+
+  return (
+    <form
+      ref={formRef}
+      action={formAction}
+      className={cn(formVariants({ variant, className }))}
+    >
+      <FormFields
+        labelText={labelText}
+        errors={errors}
+        register={register}
+        variant={variant}
+      />
+      {renderState?.(state)}
+
+      <Button
+        type="submit"
+        className={cn(actionStateSubmitButtonVariants({ variant }))}
+        disabled={isSubmitting || isPending}
+      >
+        {isPending ? (pendingText ?? "送信中...") : (submitText ?? "送信")}
+      </Button>
+    </form>
+  );
+}
+
+export {
+  ActionForm as ActionFormBySchema,
+  formVariants,
+  OnSubmitForm as OnSubmitFormBySchema,
+};

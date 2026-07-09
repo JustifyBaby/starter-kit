@@ -13,6 +13,4 @@ export const blogAction: Action = async (fd) => {
   } else {
     console.log(blog.error);
   }
-
-  redirect("/");
 };

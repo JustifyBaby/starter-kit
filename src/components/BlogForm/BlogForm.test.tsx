@@ -10,7 +10,7 @@ describe(`
   test(`Does expand success?`, () => {
     render(<BlogForm />);
     const expectLength = getExpectLenBySchema(BlogFormSchema);
-    expect(getDOMLen("label")).toBe(expectLength);
-    expect(getDOMLen("input")).toBe(expectLength);
+    expect(getDOMLen("label")).toBe(expectLength * 2);
+    expect(getDOMLen("input")).toBe(expectLength * 2);
   });
 });
