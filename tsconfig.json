@@ -21,8 +21,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@schema/*": ["./src/types/schema/*"],
-      "@scripts/*": ["./scripts/*"],
-      "@ui/*": ["./src/components/ui/*"]
+      "@scripts/*": ["./scripts/*"]
     }
   },
   "include": [
