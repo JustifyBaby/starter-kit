@@ -26,10 +26,10 @@ import {
 } from "react-hook-form";
 import z from "zod";
 import { cn } from "@/lib/utils";
-import { Input } from "./input";
-import { Label } from "./label";
-import { Button } from "./button";
-import { AlertZod } from "./alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { AlertZod } from "@/stories/Alert";
 import { Action } from "@/types/global/FormAction";
 import { type ReactNode, useActionState, useEffect, useRef } from "react";
 
@@ -149,8 +149,10 @@ type ActionStateHandler<TState> = (
 
 type ResetOnSuccess<TState> = boolean | ((state: TState) => boolean);
 
-interface FormActionStateProps<ZS extends FormSchema, TState extends object>
-  extends FormBySchemaProps<ZS> {
+interface FormActionStateProps<
+  ZS extends FormSchema,
+  TState extends object,
+> extends FormBySchemaProps<ZS> {
   action: ActionStateHandler<TState>;
   initialState: TState;
   pendingText?: string;
@@ -217,6 +219,7 @@ export function ActionForm<ZS extends FormSchema>({
   } = useForm<z.input<ZS>, unknown, z.output<ZS>>({
     resolver: zodResolver(Schema),
   });
+
   return (
     <form action={action} className={cn(formVariants({ variant, className }))}>
       <FormFields

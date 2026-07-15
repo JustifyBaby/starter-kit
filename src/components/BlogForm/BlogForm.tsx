@@ -7,7 +7,10 @@
 
 import { BlogFormSchema } from "@schema/BlogSchema";
 import { blogAction } from "./action";
-import { ActionFormBySchema, OnSubmitFormBySchema } from "../ui/FormBySchema";
+import {
+  ActionFormBySchema,
+  OnSubmitFormBySchema,
+} from "@/stories/FormBySchema";
 
 export default function BlogForm() {
   return (
