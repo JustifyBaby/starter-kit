@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { env } from "../env";
+import { ROOT_PATH } from "./path";
 
-const Z_SCHEMA_PATH = path.join(env.ABS_BASEPATH, "src/types/schema");
+const Z_SCHEMA_PATH = path.join(ROOT_PATH, "src", "types", "schema");
+
 const Z_SUFFIX = "Schema";
 
 const zodSchemaList = (content: string): string[] => {

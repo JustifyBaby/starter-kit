@@ -31,9 +31,17 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AlertZod } from "@/stories/Alert";
 import { Action } from "@/types/global/FormAction";
-import { type ReactNode, useActionState, useEffect, useRef } from "react";
+import {
+  HTMLInputTypeAttribute,
+  JSX,
+  type ReactNode,
+  useActionState,
+  useEffect,
+  useRef,
+} from "react";
+import { BlogFormSchema } from "@/types/schema/BlogSchema";
 
-const formVariants = cva("grid", {
+const formVariants = cva("grid w-full", {
   variants: {
     variant: {
       default: "gap-5",
@@ -133,6 +141,21 @@ interface FormOnsubmitProps<
   onSubmit: SubmitHandler<z.output<ZS>>;
 }
 
+type FieldEachProps<ZS> = {
+  [K in Extract<keyof FormShape<ZS>, string>]?: {
+    wrapperProps: React.ComponentProps<"div">;
+    labelProps?: Parameters<typeof Label>[0];
+    inputProps?: Parameters<typeof Input>[0];
+  };
+};
+
+type FormLayout<ZS> = {
+  [K in Extract<keyof FormShape<ZS>, string>]?: (
+    Fields: typeof FormFields,
+    Alert: typeof AlertZod,
+  ) => JSX.Element;
+};
+
 interface FormFieldsProps<
   TInput extends FieldValues,
   TOutput,
@@ -140,6 +163,8 @@ interface FormFieldsProps<
   labelText: FormLabelText<TOutput>;
   register: UseFormRegister<TInput>;
   errors?: FieldErrors<TInput>;
+  fieldEachProps?: FieldEachProps<TOutput>;
+  formLayout?: FormLayout<TOutput>;
 }
 
 type ActionStateHandler<TState> = (
@@ -187,19 +212,71 @@ function FormFields<TInput extends FieldValues, TOutput>({
   register,
   variant,
   errors,
+  fieldEachProps,
+  formLayout,
 }: FormFieldsProps<TInput, TOutput>) {
+  const wrapperProps = (name: Path<TInput>) =>
+    fieldEachProps?.[name]?.wrapperProps;
+  const labelProps = (name: Path<TInput>) => fieldEachProps?.[name]?.labelProps;
+  const inputProps = (name: Path<TInput>) => fieldEachProps?.[name]?.inputProps;
   return (Object.entries(labelText) as Array<[Path<TInput>, string]>).map(
     ([name, label]) => (
-      <div key={name} className={cn(formFieldVariants({ variant }))}>
-        <Label htmlFor={name} className={cn(formLabelVariants({ variant }))}>
-          {label}
-        </Label>
-        <Input
-          id={name}
-          className={cn(formInputVariants({ variant }))}
-          {...register(name)}
-        />
-        <AlertZod error={errors?.[name]} />
+      <div key={name}>
+        {/* {formLayout?.[name] ? (
+          formLayout[name](
+            <div>
+              <Label
+                htmlFor={name}
+                className={cn(
+                  formLabelVariants({ variant }),
+                  labelProps(name)?.className,
+                )}
+                {...labelProps(name)}
+              >
+                {label}
+              </Label>
+              <Input
+                id={name}
+                className={cn(
+                  formInputVariants({ variant }),
+                  inputProps(name)?.className,
+                )}
+                {...inputProps(name)}
+                {...register(name)}
+              />
+            </div>,
+            <AlertZod error={errors?.[name]} />,
+          )
+        ) : ( */}
+        <div
+          className={cn(
+            formFieldVariants({ variant }),
+            wrapperProps(name)?.className,
+          )}
+          {...wrapperProps(name)}
+        >
+          <Label
+            htmlFor={name}
+            className={cn(
+              formLabelVariants({ variant }),
+              labelProps(name)?.className,
+            )}
+            {...labelProps(name)}
+          >
+            {label}
+          </Label>
+          <Input
+            id={name}
+            className={cn(
+              formInputVariants({ variant }),
+              inputProps(name)?.className,
+            )}
+            {...inputProps(name)}
+            {...register(name)}
+          />
+          <AlertZod error={errors?.[name]} />
+        </div>
+        {/* )} */}
       </div>
     ),
   );
@@ -230,7 +307,7 @@ export function ActionForm<ZS extends FormSchema>({
       />
       <Button
         type="submit"
-        className="text-xl px-4 py-2"
+        className="w-full px-4 py-2 text-xl text-shadow-white"
         disabled={isSubmitting}
       >
         {submitText ?? "送信"}
@@ -271,7 +348,7 @@ export function OnSubmitForm<ZS extends FormSchema>({
       />
       <Button
         type="submit"
-        className="text-shadow-white px-8 py-4"
+        className="w-full px-8 py-4 text-shadow-white"
         disabled={isSubmitting}
       >
         {submitText ?? "送信"}
@@ -334,7 +411,10 @@ export function ActionStateForm<ZS extends FormSchema, TState extends object>({
 
       <Button
         type="submit"
-        className={cn(actionStateSubmitButtonVariants({ variant }))}
+        className={cn(
+          actionStateSubmitButtonVariants({ variant }),
+          "text-shadow-white px-8 py-4",
+        )}
         disabled={isSubmitting || isPending}
       >
         {isPending ? (pendingText ?? "送信中...") : (submitText ?? "送信")}

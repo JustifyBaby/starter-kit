@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
-import { env } from "../env";
 import { Stdin } from "tslib-stdin";
 import path from "node:path";
+import { ROOT_PATH } from "./path";
 
-const COMPONENTS_DIR_PATH = path.join(env.ABS_BASEPATH, "src", "components");
+const COMPONENTS_DIR_PATH = path.join(ROOT_PATH, "src", "components");
 
 const args = process.argv.slice(2);
 const rawInput = args[0]; // 例: "ui/button" や "Button"
@@ -17,6 +17,9 @@ const isProps = args.includes("-p") || args.includes("--props");
 
 // 実装予定のapp dirにpage.tsxを生成するロジックで用いる。
 // const isApp = args.includes("-a") || args.includes("--app");
+
+// use clientの挿入
+const isCSR = args.includes("-c") || args.includes("--client");
 
 // 入力されたパスを解析 (例: dir='ui', name='button')
 const parsedPath = path.parse(rawInput);
@@ -59,10 +62,12 @@ try {
   // recursive: true で途中の ui/ ディレクトリなども自動作成
   await fs.mkdir(newPath, { recursive: true });
 
-  const componentContent = `/**
-@description:
-  ${description}
- */
+  const componentContent = `
+${isCSR ? `"use client"` : ""}
+/**
+  @description:
+    ${description}
+*/
 
 ${isProps ? `type ${componentName}Props = {};` : ""}
 export default function ${componentName}(${isProps ? `{}: ${componentName}Props` : ""}) {
