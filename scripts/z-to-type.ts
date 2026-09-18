@@ -25,8 +25,10 @@ const gen_zInfer = (content: string): string[] => {
   let inferList: string[] = [];
   for (const schema of schemas) {
     const inferTxtIndex = schema.indexOf(Z_SUFFIX);
-    const inferName = schema.substring(0, inferTxtIndex);
-    const inferText = `export type ${inferName} = z.infer<typeof ${schema}>`;
+    let inferName = schema.substring(0, inferTxtIndex);
+    inferName = inferName[0].toUpperCase() + inferName.substring(1);
+
+    const inferText = `export type ${inferName}Type = z.infer<typeof ${schema}>`;
     inferList = [...inferList, inferText];
   }
 

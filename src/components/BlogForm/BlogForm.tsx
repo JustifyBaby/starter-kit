@@ -6,6 +6,7 @@
  */
 
 import { BlogFormSchema } from "@schema/BlogSchema";
+import { BlogFormType } from "@/types/BlogSchema.types";
 import { blogAction } from "./action";
 import {
   ActionFormBySchema,
@@ -13,9 +14,12 @@ import {
 } from "@/stories/FormBySchema";
 
 export default function BlogForm() {
+  const handleSubmit = (data: BlogFormType) => {
+    console.log(data);
+  };
   return (
     <div>
-      <div>
+      <div className="flex flex-col justify-center items-center pt-6">
         <p>Action</p>
         <ActionFormBySchema
           Schema={BlogFormSchema}
@@ -24,14 +28,12 @@ export default function BlogForm() {
           className="mx-auto w-full max-w-md"
         />
       </div>
-      <div className="flex flex-col justify-center items-center pt-8">
+      <div className="flex flex-col justify-center items-center py-8">
         <p>OnSubmit</p>
         <OnSubmitFormBySchema
           Schema={BlogFormSchema}
           labelText={{ title: "タイトル", body: "本文" }}
-          onSubmit={(data) => {
-            console.log(data);
-          }}
+          onSubmit={handleSubmit}
           className="mx-auto w-full max-w-md"
         />
       </div>

@@ -19,7 +19,7 @@ function AlertFrame({
 }) {
   return (
     <div
-      className={cn("text-sm text-red-600 shadow", className)}
+      className={cn("text-sm text-red-600 shadow-xs p-2", className)}
       aria-live="polite"
       {...props}
     >

@@ -1,12 +1,11 @@
 "use client";
 /**
   @description:
-    
+    Hello
 */
 
-type TestGenProps = {
-  det: number;
-};
+type TestGenProps = { aaa: string };
+
 export default function TestGen({}: TestGenProps) {
   return <div></div>;
 }

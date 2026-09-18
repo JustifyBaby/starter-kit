@@ -13,13 +13,25 @@ if (!rawInput) {
   process.exit(1);
 }
 
-const isProps = args.includes("-p") || args.includes("--props");
+const hasOption = (
+  optionName: `--${string}`,
+  shortOptionName?: `-${string}`,
+) =>
+  args.includes(optionName) || shortOptionName == undefined
+    ? false
+    : args.includes(shortOptionName);
+
+// propsの空定義の自動挿入
+const isProps = hasOption("--props", "-p");
 
 // 実装予定のapp dirにpage.tsxを生成するロジックで用いる。
-// const isApp = args.includes("-a") || args.includes("--app");
+const isRoute = hasOption("--route", "-r");
 
 // use clientの挿入
-const isCSR = args.includes("-c") || args.includes("--client");
+const isCSR = hasOption("--client", "-c");
+
+// action.tsの導入
+const hasAction = hasOption("--action", "-a");
 
 // 入力されたパスを解析 (例: dir='ui', name='button')
 const parsedPath = path.parse(rawInput);
@@ -29,12 +41,7 @@ const rawComponentName = parsedPath.name;
 // パス部分を除いた純粋なコンポーネント名をPascalCaseに変換
 const componentName = rawComponentName
   .split(" ")
-  .map((cname) => {
-    const chars = Array.from(cname);
-    if (chars.length === 0) return "";
-    chars[0] = chars[0].toUpperCase();
-    return chars.join("");
-  })
+  .map((cname) => `${cname[0].toUpperCase()}${cname.substring(1)}`)
   .join("");
 
 const description = Stdin.streamReadText(
@@ -63,13 +70,14 @@ try {
   await fs.mkdir(newPath, { recursive: true });
 
   const componentContent = `
-${isCSR ? `"use client"` : ""}
+${isCSR ? `"use client";` : ""}
 /**
   @description:
     ${description}
 */
 
 ${isProps ? `type ${componentName}Props = {};` : ""}
+
 export default function ${componentName}(${isProps ? `{}: ${componentName}Props` : ""}) {
   return (
     <div></div>
@@ -99,6 +107,18 @@ ${"`"}, () => {
     path.join(newPath, `${componentName}.test.tsx`),
     testContent,
   );
+  if (hasAction) {
+    const actionContent = `"use server";
+
+export async function ${componentName[0].toLowerCase()}${componentName.substring(1)}Action(
+  // prevState: ,
+  fd: FormData
+): Promise<> {
+
+}
+    `;
+    await fs.writeFile(path.join(newPath, "action.ts"), actionContent);
+  }
 
   console.log(`Successful to create ${componentName}`);
 } catch (err) {
