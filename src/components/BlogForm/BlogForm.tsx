@@ -25,6 +25,13 @@ export default function BlogForm() {
           Schema={BlogFormSchema}
           labelText={{ title: "タイトル", body: "本文" }}
           action={blogAction}
+          fieldEachProps={{
+            title: {
+              labelProps: {
+                className: "",
+              },
+            },
+          }}
           className="mx-auto w-full max-w-md"
         />
       </div>

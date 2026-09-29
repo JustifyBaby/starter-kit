@@ -31,15 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AlertZod } from "@/stories/Alert";
 import { Action } from "@/types/global/FormAction";
-import {
-  HTMLInputTypeAttribute,
-  JSX,
-  type ReactNode,
-  useActionState,
-  useEffect,
-  useRef,
-} from "react";
-import { BlogFormSchema } from "@/types/schema/BlogSchema";
+import { JSX, type ReactNode, useActionState, useEffect, useRef } from "react";
 
 const formVariants = cva("grid w-full", {
   variants: {
@@ -123,12 +115,20 @@ type FormShape<ZS> = ZS extends z.ZodObject<infer Shape> ? Shape : never;
 type FormLabelText<ZS> = {
   [K in Extract<keyof FormShape<ZS>, string>]: string;
 };
+type FieldEachProps<ZS> = {
+  [K in Extract<keyof FormShape<ZS>, string>]?: Partial<{
+    wrapperProps: React.ComponentProps<"div">;
+    labelProps: Parameters<typeof Label>[0];
+    inputProps: Parameters<typeof Input>[0];
+  }>;
+};
 
 interface FormBySchemaProps<ZS> extends VariantProps<typeof formVariants> {
   Schema: ZS;
   labelText: FormLabelText<ZS>;
   submitText?: string;
   className?: string;
+  fieldEachProps?: FieldEachProps<ZS>;
 }
 
 interface FormActionProps<ZS> extends FormBySchemaProps<ZS> {
@@ -140,14 +140,6 @@ interface FormOnsubmitProps<
 > extends FormBySchemaProps<ZS> {
   onSubmit: SubmitHandler<z.output<ZS>>;
 }
-
-type FieldEachProps<ZS> = {
-  [K in Extract<keyof FormShape<ZS>, string>]?: {
-    wrapperProps: React.ComponentProps<"div">;
-    labelProps?: Parameters<typeof Label>[0];
-    inputProps?: Parameters<typeof Input>[0];
-  };
-};
 
 type FormLayout<ZS> = {
   [K in Extract<keyof FormShape<ZS>, string>]?: (
@@ -213,7 +205,7 @@ function FormFields<TInput extends FieldValues, TOutput>({
   variant,
   errors,
   fieldEachProps,
-  formLayout,
+  // formLayout,
 }: FormFieldsProps<TInput, TOutput>) {
   const wrapperProps = (name: Path<TInput>) =>
     fieldEachProps?.[name]?.wrapperProps;
@@ -289,6 +281,7 @@ export function ActionForm<ZS extends FormSchema>({
   variant,
   className,
   submitText,
+  fieldEachProps,
 }: FormActionProps<ZS>) {
   const {
     register,
@@ -304,6 +297,7 @@ export function ActionForm<ZS extends FormSchema>({
         register={register}
         variant={variant}
         errors={errors}
+        fieldEachProps={fieldEachProps}
       />
       <Button
         type="submit"
@@ -323,6 +317,7 @@ export function OnSubmitForm<ZS extends FormSchema>({
   variant,
   className,
   submitText,
+  fieldEachProps,
 }: FormOnsubmitProps<ZS>) {
   const {
     register,
@@ -346,6 +341,7 @@ export function OnSubmitForm<ZS extends FormSchema>({
         register={register}
         variant={variant}
         errors={errors}
+        fieldEachProps={fieldEachProps}
       />
       <Button
         type="submit"
@@ -369,6 +365,7 @@ export function ActionStateForm<ZS extends FormSchema, TState extends object>({
   variant,
   renderState,
   resetOnSuccess,
+  fieldEachProps,
 }: FormActionStateProps<ZS, TState>) {
   const formRef = useRef<HTMLFormElement>(null);
   const initialStateRef = useRef(initialState);
@@ -407,6 +404,7 @@ export function ActionStateForm<ZS extends FormSchema, TState extends object>({
         errors={errors}
         register={register}
         variant={variant}
+        fieldEachProps={fieldEachProps}
       />
       {renderState?.(state)}
 
