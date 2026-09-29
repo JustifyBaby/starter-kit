@@ -4,8 +4,6 @@
     Hello
 */
 
-type TestGenProps = { aaa: string };
-
-export default function TestGen({}: TestGenProps) {
+export default function TestGen() {
   return <div></div>;
 }
