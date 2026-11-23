@@ -9,7 +9,7 @@ export const BlogFormSchema = z.object({
   body: z.string().min(1, { error: RANGE_ERROR }),
 });
 
-export const BlogSchema = BlogFormSchema.extend({
+export const blogSchema = BlogFormSchema.extend({
   id: z.string(),
   createdAt: z.string().transform((val) => new Date(val)),
 });
