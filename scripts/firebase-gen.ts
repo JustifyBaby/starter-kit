@@ -1,7 +1,4 @@
 import { Stdin } from "tslib-stdin";
-import fs from "node:fs";
-import { env } from "../env";
-import path from "node:path";
 
 const firebases = Stdin.streamReads(
   "Firebase text >> \n",
